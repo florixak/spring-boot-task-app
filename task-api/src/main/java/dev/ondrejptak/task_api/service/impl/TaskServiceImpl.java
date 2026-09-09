@@ -5,9 +5,11 @@ import dev.ondrejptak.task_api.domain.entity.Task;
 import dev.ondrejptak.task_api.domain.entity.TaskStatus;
 import dev.ondrejptak.task_api.repository.TaskRepository;
 import dev.ondrejptak.task_api.service.TaskService;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.List;
 
 @Service
 public class TaskServiceImpl implements TaskService {
@@ -24,5 +26,10 @@ public class TaskServiceImpl implements TaskService {
 		Task task = new Task(null, request.title(), request.description(), request.dueDate(), TaskStatus.OPEN, request.priority(), now, now);
 
 		return taskRepository.save(task);
+	}
+
+	@Override
+	public List<Task> getAllTasks() {
+		return taskRepository.findAll(Sort.by(Sort.Direction.ASC, "createdAt"));
 	}
 }
