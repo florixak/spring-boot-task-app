@@ -1,18 +1,20 @@
 package dev.ondrejptak.task_api.controller;
 
 import dev.ondrejptak.task_api.domain.CreateTaskRequest;
+import dev.ondrejptak.task_api.domain.UpdateTaskRequest;
 import dev.ondrejptak.task_api.domain.dto.CreateTaskRequestDto;
 import dev.ondrejptak.task_api.domain.dto.TaskDto;
+import dev.ondrejptak.task_api.domain.dto.UpdateTaskRequestDto;
 import dev.ondrejptak.task_api.domain.entity.Task;
 import dev.ondrejptak.task_api.mapper.TaskMapper;
 import dev.ondrejptak.task_api.service.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(path = "/api/v1/tasks")
@@ -32,5 +34,28 @@ public class TaskController {
 		Task task = taskService.createTask(createTaskRequest);
 		TaskDto createdTaskDto = taskMapper.toDto(task);
 		return new ResponseEntity<>(createdTaskDto, HttpStatus.CREATED);
+	}
+
+	@GetMapping
+	public ResponseEntity<List<TaskDto>> getAllTasks() {
+		List<Task> tasks = taskService.getAllTasks();
+		List<TaskDto> taskDtos = tasks.stream()
+				.map(taskMapper::toDto)
+				.toList();
+		return new ResponseEntity<>(taskDtos, HttpStatus.OK);
+	}
+
+	@PutMapping("/{taskId}")
+	public ResponseEntity<TaskDto> updateTask(@PathVariable("taskId") UUID taskId, @Valid @RequestBody UpdateTaskRequestDto updateTaskRequestDto) {
+		UpdateTaskRequest updateTaskRequest = taskMapper.fromDto(updateTaskRequestDto);
+		Task task = taskService.updateTask(taskId, updateTaskRequest);
+		TaskDto updatedTaskDto = taskMapper.toDto(task);
+		return new ResponseEntity<>(updatedTaskDto, HttpStatus.OK);
+	}
+
+	@DeleteMapping("/{taskId}")
+	public ResponseEntity<Void> deleteTask(@PathVariable("taskId") UUID taskId) {
+		taskService.deleteTask(taskId);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 }
